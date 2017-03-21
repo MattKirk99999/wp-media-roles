@@ -15,7 +15,7 @@
  * @wordpress-plugin
  * Plugin Name:       WP Media Roles
  * Plugin URI:        5nines.com/wordpress/plugins/wp-media-roles
- * Description:       This is a short description of what the plugin does. It's displayed in the WordPress admin area.
+ * Description:       Adds the power to deny access to media according to role.
  * Version:           1.0.0
  * Author:            Matthew Kirk
  * Author URI:        5nines.com
