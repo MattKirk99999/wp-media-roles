@@ -59,7 +59,7 @@ class Wp_Media_Roles_Public_Unit_Test extends WP_UnitTestCase
         // mock tested class.
         
         $mediaRolePublic = Mockery::mock(
-                'Wp_Media_Roles_Public[getMediaByMeta, getValidPathFromQueryArg, redirectToPdf, getOption, pluginDependenciesExist, hasPermissionToViewMedia]', 
+                'Wp_Media_Roles_Public[getMediaByMeta, getValidPathFromUrl, redirectToPdf, getOption, pluginDependenciesExist, hasPermissionToViewMedia]', 
                 array ("pluginname", "version", $wordpressApi, $phpApi, $membersApi));
         
         // setup dont-cares
@@ -69,7 +69,7 @@ class Wp_Media_Roles_Public_Unit_Test extends WP_UnitTestCase
         // setup test.
         
         $mediaRolePublic->shouldReceive('hasPermissionToViewMedia')->once()->andReturn($IS_PERMITTED_TO_VIEW);
-        $mediaRolePublic->shouldReceive('getValidPathFromQueryArg')->once();
+        $mediaRolePublic->shouldReceive('getValidPathFromUrl')->once();
         $mediaRolePublic->shouldReceive('getMediaByMeta')->once()->andReturn($post_mock);
         $mediaRolePublic->shouldReceive('redirectToPdf')->once();
         $phpApi->shouldReceive('___exit')->once();
@@ -108,7 +108,7 @@ class Wp_Media_Roles_Public_Unit_Test extends WP_UnitTestCase
         // mock tested class.
         
         $mediaRolePublic = Mockery::mock(
-                'Wp_Media_Roles_Public[getMediaByMeta, getValidPathFromQueryArg, redirectToPdf, getOption, pluginDependenciesExist, hasPermissionToViewMedia]', 
+                'Wp_Media_Roles_Public[getMediaByMeta, getValidPathFromUrl, redirectToPdf, getOption, pluginDependenciesExist, hasPermissionToViewMedia]', 
                 array ("pluginname", "version", $wordpressApi, $phpApi, $membersApi));
         
         // setup dont-cares
@@ -118,7 +118,7 @@ class Wp_Media_Roles_Public_Unit_Test extends WP_UnitTestCase
         // setup test.
         
         $mediaRolePublic->shouldReceive('hasPermissionToViewMedia')->once()->andReturn($IS_PERMITTED_TO_VIEW);
-        $mediaRolePublic->shouldReceive('getValidPathFromQueryArg')->once();
+        $mediaRolePublic->shouldReceive('getValidPathFromUrl')->once();
         $mediaRolePublic->shouldReceive('getMediaByMeta')->once()->andReturn($post_mock);
         $wordpressApi->shouldReceive('wp_redirect')->once();
         $phpApi->shouldReceive('___exit')->once();
@@ -139,11 +139,10 @@ class Wp_Media_Roles_Public_Unit_Test extends WP_UnitTestCase
      * 
      * none
      */
-    function test_getValidPathFromQueryArgValidatesAndReturnsValidPath() 
+    function test_getValidPathFromUrlValidatesAndReturnsValidPath() 
     {
         // configuration.
         
-        $INPUT_GET = "get_file";
         $URL = "/wp-content/2017/03/file.pdf";
         
         // mock dependencies.
@@ -164,7 +163,7 @@ class Wp_Media_Roles_Public_Unit_Test extends WP_UnitTestCase
         
         // run test.
         
-        $return = $mediaRolePublic->getValidPathFromQueryArg( $phpApi, $INPUT_GET);
+        $return = $mediaRolePublic->getValidPathFromUrl( $phpApi );
         
         $this->assertEquals($URL, $return);
     }
@@ -178,7 +177,7 @@ class Wp_Media_Roles_Public_Unit_Test extends WP_UnitTestCase
      * 
      * @expectedException Exception
      */
-    function test_getValidPathFromQueryArgRejectsInvalidPath() 
+    function test_getValidPathFromUrlRejectsInvalidPath() 
     {
         // configuration.
         
@@ -199,7 +198,7 @@ class Wp_Media_Roles_Public_Unit_Test extends WP_UnitTestCase
         
         // run test.
         
-        $mediaRolePublic->getValidPathFromQueryArg( $phpApi, $INPUT_GET);
+        $mediaRolePublic->getValidPathFromUrl( $phpApi, $INPUT_GET);
     }
     
     /**

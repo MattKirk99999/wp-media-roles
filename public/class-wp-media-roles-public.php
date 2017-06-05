@@ -122,6 +122,9 @@ class Wp_Media_Roles_Public {
     
     public function init()
     {
+        global $wp;
+        $current_url = home_url(add_query_arg(array(),$wp->request));
+        
         try 
         {
             $this->doMediaRolePermissions($this->wordpressApi, $this->phpApi, $this->membersApi);
@@ -139,7 +142,7 @@ class Wp_Media_Roles_Public {
     
     public function doMediaRolePermissions(wpapi\v1\WordpressPluginApi $wordpressApi, PhpApi $phpApi, MembersApi $membersApi)
     {
-        $GET_FILE = $this->getValidPathFromQueryArg($phpApi, "get_file");
+        $GET_FILE = $this->getValidPathFromUrl($phpApi);
 
         $post = $this->getMediaPostByPath($GET_FILE);
 
@@ -175,7 +178,7 @@ class Wp_Media_Roles_Public {
 
     public function getMediaPostByPath($path)
     {
-        $_wp_attached_file = substr ( $path, strlen("wp-content/uploads/") );
+        $_wp_attached_file = substr ( $path, strlen("/wp-content/uploads") );
         
         $post = $this->getMediaByMeta('_wp_attached_file', $_wp_attached_file);
         
@@ -219,14 +222,14 @@ class Wp_Media_Roles_Public {
         }
     }
     
-    public function getValidPathFromQueryArg(PhpApi $phpApi, $arg)
+    public function getValidPathFromUrl(PhpApi $phpApi)
     {
-        $url = $phpApi->filter_input(INPUT_GET, $arg, FILTER_SANITIZE_SPECIAL_CHARS );
-
+        $url = $phpApi->filter_input(INPUT_SERVER, 'REQUEST_URI', FILTER_SANITIZE_URL);
+        
         if (strlen($url) < 5) throw new Exception();
         
         if (substr ( $url , -4) !== ".pdf") throw new Exception();
-
+        
         if ($phpApi->file_exists ( ABSPATH . $url )) 
         {
             // do nothing.
