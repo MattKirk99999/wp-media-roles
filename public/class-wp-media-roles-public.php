@@ -122,16 +122,14 @@ class Wp_Media_Roles_Public {
     
     public function init()
     {
-        global $wp;
-        $current_url = home_url(add_query_arg(array(),$wp->request));
-        
         try 
         {
             $this->doMediaRolePermissions($this->wordpressApi, $this->phpApi, $this->membersApi);
         }
         catch (Exception $e)
         {
-            // do nothing.
+//            var_dump("PLEASE REFRESH --- WE ARE UPGRADING THE WEBSITE!");
+//            exit();
         }
     }
     
@@ -142,14 +140,17 @@ class Wp_Media_Roles_Public {
     
     public function doMediaRolePermissions(wpapi\v1\WordpressPluginApi $wordpressApi, PhpApi $phpApi, MembersApi $membersApi)
     {
+//var_dump("PLEASE REFRESH -- WE ARE UPGRADING THE WEBSITE!");
         $GET_FILE = $this->getValidPathFromUrl($phpApi);
-
+//var_dump($GET_FILE);
         $post = $this->getMediaPostByPath($GET_FILE);
-
+//var_dump($post);
         $openInBrowser = $this->getOption("open-in-browser");
-        
+//var_dump($openInBrowser);
         if ($this->hasPermissionToViewMedia($wordpressApi, $membersApi, $post))
         {
+//            var_dump("PLEASE REFRESH -- WE ARE UPGRADING THE WEBSITE!");
+//            exit();
             $this->redirectToPdf($phpApi, $GET_FILE, $openInBrowser);
         }
         else
@@ -205,8 +206,11 @@ class Wp_Media_Roles_Public {
                 return true;
             }
         }
-
-        if (!$this->pluginDependenciesExist($membersApi) && $this->getOption("fail-secure")) return false;
+        
+        if (!$this->pluginDependenciesExist($membersApi))
+        {
+            return !$this->getOption("fail-secure");
+        }
         
         if ($membersApi->members_can_current_user_view_post( $post->ID )) return true;
         
@@ -218,7 +222,7 @@ class Wp_Media_Roles_Public {
         switch ($key)
         {
             case "open-in-browser" : return true;
-            case "fail-secure" : return true;
+            case "fail-secure" : return false;
         }
     }
     
@@ -287,7 +291,7 @@ class Wp_Media_Roles_Public {
         
         if ($startOfFilename === 1 || $startOfFilename >= strlen($url))
         {
-            $filename = "wasbdocument.pdf";
+            $filename = "document.pdf";
         }
         else
         {
