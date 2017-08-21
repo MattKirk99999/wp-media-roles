@@ -141,6 +141,7 @@ class Wp_Media_Roles_Public {
     public function doMediaRolePermissions(wpapi\v1\WordpressPluginApi $wordpressApi, PhpApi $phpApi, MembersApi $membersApi)
     {
 //var_dump("PLEASE REFRESH -- WE ARE UPGRADING THE WEBSITE!");
+//exit();
         $GET_FILE = $this->getValidPathFromUrl($phpApi);
 //var_dump($GET_FILE);
         $post = $this->getMediaPostByPath($GET_FILE);
@@ -151,17 +152,28 @@ class Wp_Media_Roles_Public {
         {
 //            var_dump("PLEASE REFRESH -- WE ARE UPGRADING THE WEBSITE!");
 //            exit();
-            $this->redirectToPdf($phpApi, $GET_FILE, $openInBrowser);
+            $this->redirectToMedia($phpApi, $GET_FILE, $openInBrowser);
         }
         else
         {
+//            var_dump("PLEASE REFRESH -- we are upgrading the website.");
+//            exit();
             $wordpressApi->wp_redirect("/?attachment_id=".$post->ID);
         }
-
         $phpApi->___exit();
     }
+// .pdf .doc .docx .xls .xlsx .ppt .pptx .rtf
+    public function pluginDependenciesExist($exclusionOption, MembersApi $membersApi)
+    {        
+        if ($exclusionOption === "members")
+        {
+            return $this->membersPluginIsEnabled($membersApi);
+        }
+        
+        return true;
+    }
     
-    public function pluginDependenciesExist(MembersApi $membersApi)
+    public function membersPluginIsEnabled($membersApi)
     {
         try
         {
@@ -193,6 +205,7 @@ class Wp_Media_Roles_Public {
     
     public function hasPermissionToViewMedia(wpapi\v1\WordpressPluginApi $wordpressApi, MembersApi $membersApi, $post)
     {
+//var_dump("PLEASE REFRESH -- WE ARE UPGRADING THE WEBSITE!");
         if ($wordpressApi->is_admin()) return true;
         
         if ($post === null || $post->ID === null)
@@ -206,14 +219,28 @@ class Wp_Media_Roles_Public {
                 return true;
             }
         }
-        
-        if (!$this->pluginDependenciesExist($membersApi))
+//var_dump("1");
+        $exclusionOption = $this->getOption("exclude-type");
+
+        if (!$this->pluginDependenciesExist($exclusionOption, $membersApi))
         {
+//var_dump("2");
             return !$this->getOption("fail-secure");
         }
-        
-        if ($membersApi->members_can_current_user_view_post( $post->ID )) return true;
-        
+//var_dump("3");       
+        if ($exclusionOption === "members")
+        {
+//var_dump("4");
+            if ($membersApi->members_can_current_user_view_post( $post->ID )) 
+                return true;
+        }
+        else if ($exclusionOption === "login-status")
+        {
+//var_dump("5");C
+            return is_user_logged_in();
+        }
+//var_dump("6");
+//exit();
         return false;
     }
     
@@ -223,16 +250,33 @@ class Wp_Media_Roles_Public {
         {
             case "open-in-browser" : return true;
             case "fail-secure" : return false;
+            case "exclude-type": return "login-status"; // "members"
         }
+    }
+    
+    function fatal_handler() {
+
+        $error = error_get_last();
+        var_dump($error);
     }
     
     public function getValidPathFromUrl(PhpApi $phpApi)
     {
         $url = $phpApi->filter_input(INPUT_SERVER, 'REQUEST_URI', FILTER_SANITIZE_URL);
         
+        if ($url === null || strlen($url) === 0) $url = $_SERVER['REQUEST_URI'];
+        
+//        if ($url === null || strlen($url) <= 1) $url = $_SERVER['PHP_SELF'];
+//register_shutdown_function( array($this, "fatal_handler") );
+
+//var_dump($_GET);
+//var_dump($url); 
+//var_dump($_SERVER['REQUEST_URI']);
         if (strlen($url) < 5) throw new Exception();
         
-        if (substr ( $url , -4) !== ".pdf") throw new Exception();
+        $fileExtension = $this->get_file_extension($url);
+        
+        if (!$this->validFileExtension($fileExtension)) throw new Exception();
         
         if ($phpApi->file_exists ( ABSPATH . $url )) 
         {
@@ -254,18 +298,71 @@ class Wp_Media_Roles_Public {
         return $url;
     }
     
-    public function redirectToPdf(PhpApi $phpApi, $url, $openInBrowser = false)
+    public function validFileExtension($fileExtension)
     {
-        $phpApi->header("Content-type:application/pdf");
-            
+        switch ($fileExtension)
+        {
+            case "pdf":
+            case "doc":
+            case "docx":
+            case "xls":
+            case "xlsx":
+            case "ppt":
+            case "pptx":
+            case "rtf":
+                return true;
+        }
+        
+        return false;
+    }
+
+    public function redirectToMedia(PhpApi $phpApi, $url, $openInBrowser = false)
+    {
+        // .pdf .doc .docx .xls .xlsx .ppt .pptx .rtf
+        
+        $filename = $this->getFileNameFromUrl($url);
+        
+        $fileExtension = $this->get_file_extension($filename);
+        
+        switch ($fileExtension)
+        {
+            case "pdf":
+                $phpApi->header("Content-type:application/pdf");
+                break;
+            case "doc":
+                $phpApi->header("Content-type:application/msword");
+                break;
+            case "docx":
+                $phpApi->header("Content-type:application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+                break;
+            case "xls":
+                $phpApi->header("Content-type:application/vnd.ms-excel");
+                break;
+            case "xlsx":
+                $phpApi->header("Content-type:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+                break;
+            case "ppt":
+                $phpApi->header("Content-type:application/vnd.ms-powerpoint");
+                break;
+            case "pptx":
+                $phpApi->header("Content-type:application/vnd.openxmlformats-officedocument.presentationml.presentation");
+                break;
+            case "rtf":
+                // not sure...
+                break;
+        }
+
         if (!$openInBrowser)
         {
-            $filename = $this->getFileNameFromUrl($url);
-
             $phpApi->header("Content-Disposition:attachment;filename='$filename'");
         }
 
         $phpApi->readfile(ABSPATH . $url);
+    }
+    
+    public function get_file_extension($file_name) 
+    {
+	return substr(strrchr($file_name,'.'),1);
     }
     
     public function getMediaByMeta($key, $value)
