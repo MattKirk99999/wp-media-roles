@@ -128,8 +128,7 @@ class Wp_Media_Roles_Public {
         }
         catch (Exception $e)
         {
-//            var_dump("PLEASE REFRESH --- WE ARE UPGRADING THE WEBSITE!");
-//            exit();
+
         }
     }
     
@@ -140,24 +139,18 @@ class Wp_Media_Roles_Public {
     
     public function doMediaRolePermissions(wpapi\v1\WordpressPluginApi $wordpressApi, PhpApi $phpApi, MembersApi $membersApi)
     {
-//var_dump("PLEASE REFRESH -- WE ARE UPGRADING THE WEBSITE!");
-//exit();
         $GET_FILE = $this->getValidPathFromUrl($phpApi);
-//var_dump($GET_FILE);
+
         $post = $this->getMediaPostByPath($GET_FILE);
-//var_dump($post);
+
         $openInBrowser = $this->getOption("open-in-browser");
-//var_dump($openInBrowser);
+
         if ($this->hasPermissionToViewMedia($wordpressApi, $membersApi, $post))
         {
-//            var_dump("PLEASE REFRESH -- WE ARE UPGRADING THE WEBSITE!");
-//            exit();
             $this->redirectToMedia($phpApi, $GET_FILE, $openInBrowser);
         }
         else
         {
-//            var_dump("PLEASE REFRESH -- we are upgrading the website.");
-//            exit();
             $wordpressApi->wp_redirect("/?attachment_id=".$post->ID);
         }
         $phpApi->___exit();
@@ -205,7 +198,6 @@ class Wp_Media_Roles_Public {
     
     public function hasPermissionToViewMedia(wpapi\v1\WordpressPluginApi $wordpressApi, MembersApi $membersApi, $post)
     {
-//var_dump("PLEASE REFRESH -- WE ARE UPGRADING THE WEBSITE!");
         if ($wordpressApi->is_admin()) return true;
         
         if ($post === null || $post->ID === null)
@@ -219,28 +211,23 @@ class Wp_Media_Roles_Public {
                 return true;
             }
         }
-//var_dump("1");
+
         $exclusionOption = $this->getOption("exclude-type");
 
         if (!$this->pluginDependenciesExist($exclusionOption, $membersApi))
         {
-//var_dump("2");
             return !$this->getOption("fail-secure");
-        }
-//var_dump("3");       
-        if ($exclusionOption === "members")
+        }     
+        else if ($exclusionOption === "members")
         {
-//var_dump("4");
             if ($membersApi->members_can_current_user_view_post( $post->ID )) 
                 return true;
         }
         else if ($exclusionOption === "login-status")
         {
-//var_dump("5");C
             return is_user_logged_in();
         }
-//var_dump("6");
-//exit();
+
         return false;
     }
     
@@ -266,12 +253,6 @@ class Wp_Media_Roles_Public {
         
         if ($url === null || strlen($url) === 0) $url = $_SERVER['REQUEST_URI'];
         
-//        if ($url === null || strlen($url) <= 1) $url = $_SERVER['PHP_SELF'];
-//register_shutdown_function( array($this, "fatal_handler") );
-
-//var_dump($_GET);
-//var_dump($url); 
-//var_dump($_SERVER['REQUEST_URI']);
         if (strlen($url) < 5) throw new Exception();
         
         $fileExtension = $this->get_file_extension($url);
@@ -411,5 +392,22 @@ class Wp_Media_Roles_Public {
     {
         global $wpdb;
         return $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE guid LIKE '%s'", "%$guid" ) );
+    }
+    
+    public function getHtaccessRules()
+    {
+        $ret = "";
+        
+        $ret .= "<IfModule mod_rewrite.c>";
+        $ret .=     "RewriteEngine On";
+        $ret .=     "### start-wp-media-roles ###";
+        $ret .=     "RewriteCond %{HTTP_HOST} ^wasb.org [OR]";
+        $ret .=     "RewriteCond %{HTTP_HOST} ^www.wasb.org$";
+        $ret .=     "RewriteCond %{REQUEST_FILENAME} -f";
+        $ret .=     "RewriteRule ^(.+\.(pdf|doc))$ /index.php [L]";
+        $ret .=     "### end-wp-media-roles ###";
+        $ret .= "</IfModule>";
+        
+        return $ret;
     }
 }
