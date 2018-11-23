@@ -154,15 +154,15 @@ class Wp_Media_Roles_Public {
             $wordpressApi->wp_redirect("/?attachment_id=".$post->ID);
         }
         $phpApi->___exit();
-    }
-// .pdf .doc .docx .xls .xlsx .ppt .pptx .rtf
+    }   
+
     public function pluginDependenciesExist($exclusionOption, MembersApi $membersApi)
     {        
         if ($exclusionOption === "members")
         {
             return $this->membersPluginIsEnabled($membersApi);
         }
-        
+    
         return true;
     }
     
@@ -211,13 +211,13 @@ class Wp_Media_Roles_Public {
                 return true;
             }
         }
-
+        
         $exclusionOption = $this->getOption("exclude-type");
 
         if (!$this->pluginDependenciesExist($exclusionOption, $membersApi))
         {
             return !$this->getOption("fail-secure");
-        }     
+        }
         else if ($exclusionOption === "members")
         {
             if ($membersApi->members_can_current_user_view_post( $post->ID )) 
@@ -227,7 +227,7 @@ class Wp_Media_Roles_Public {
         {
             return is_user_logged_in();
         }
-
+        
         return false;
     }
     
@@ -237,7 +237,7 @@ class Wp_Media_Roles_Public {
         {
             case "open-in-browser" : return true;
             case "fail-secure" : return false;
-            case "exclude-type": return "login-status"; // "members"
+            case "exclude-type": return "members"; //"login-status";
         }
     }
     
@@ -278,7 +278,7 @@ class Wp_Media_Roles_Public {
         
         return $url;
     }
-    
+
     public function validFileExtension($fileExtension)
     {
         switch ($fileExtension)
@@ -332,7 +332,7 @@ class Wp_Media_Roles_Public {
                 // not sure...
                 break;
         }
-
+            
         if (!$openInBrowser)
         {
             $phpApi->header("Content-Disposition:attachment;filename='$filename'");
@@ -404,7 +404,7 @@ class Wp_Media_Roles_Public {
         $ret .=     "RewriteCond %{HTTP_HOST} ^wasb.org [OR]";
         $ret .=     "RewriteCond %{HTTP_HOST} ^www.wasb.org$";
         $ret .=     "RewriteCond %{REQUEST_FILENAME} -f";
-        $ret .=     "RewriteRule ^(.+\.(pdf|doc))$ /index.php [L]";
+        $ret .=     "RewriteRule ^(.+\.(pdf|doc|docx|xls|xlsx|ppt|pptx))$ /index.php [L]";
         $ret .=     "### end-wp-media-roles ###";
         $ret .= "</IfModule>";
         
