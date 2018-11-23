@@ -11,6 +11,73 @@
  * @package    Wp_Media_Roles
  * @subpackage Wp_Media_Roles/admin/partials
  */
+
+function getMembersApi(): MembersApi
+{
+    return apply_filters('members_api', null);
+}
+
+$membersApi = getMembersApi();
 ?>
 
-<!-- This file should primarily consist of HTML with a little bit of PHP. -->
+<div class="wrap">
+
+    <h1>
+        Media Permissions
+    </h1>
+    <br/>
+    <div id="poststuff">
+        <div id="post-body" class="metabox-holder columns-2">
+
+            <!-- main content -->
+            <div id="post-body-content">
+                <table>
+                    <tr>
+                        <td>
+                            Members Plugin is Active:
+                        </td>
+                        <td>
+                            <?php echo($membersApi->is_active() > 0 ? "True":"<b>False</b>"); ?>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Members Plugin is Synced:
+                        </td>
+                        <td>
+                            <?php echo($membersApi->is_synced() > 0 ? "True":"<b>False</b>"); ?>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Members Admin Instance Loaded:
+                        </td>
+                        <td>
+                            <?php echo($membersApi->get_membersuite_admin_instance() > 0 ? "True":"<b>False</b>"); ?>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            .htaccess exists:
+                        </td>
+                        <td>
+                            <?php 
+                            $exists = $this->htaccessExists();
+                            echo($exists ? "True":"<b>False</b>"); 
+                            echo " (<i>" . $this->getHtaccessPath() . "</i>)";
+                            ?>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            .htaccess is valid:
+                        </td>
+                        <td>
+                            <?php echo($this->htaccessIsValid() ? "True":"<b>False</b>"); ?>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

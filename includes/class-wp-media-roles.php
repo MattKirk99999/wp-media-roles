@@ -178,11 +178,19 @@ class Wp_Media_Roles {
 	 */
 	private function define_admin_hooks() {
 
-		$plugin_admin = new Wp_Media_Roles_Admin( $this->get_plugin_name(), $this->get_version() );
+		$plugin_admin = new Wp_Media_Roles_Admin( 
+                        $this->get_plugin_name(), 
+                        $this->get_version(),
+                        $this->wordpressApi,
+                        $this->phpApi,
+                        $this->membersApi);
 
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
 
+                $this->loader->add_action( 'admin_menu', $plugin_admin, 'add_management_page_action');
+                
+                $this->loader->add_filter( 'members_api', $plugin_admin, 'members_api_filter');
 	}
 
 	/**
@@ -204,7 +212,16 @@ class Wp_Media_Roles {
 //		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
 //		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
 
+                $membersRef =  $this->membersApi->get_membersuite_admin_instance();
+                
                 $this->loader->add_action( 'init', $plugin_public, 'init', 10, 0);
+                
+                if ($membersRef !== null)
+                {
+                    $this->loader->add_action( 'edit_attachment', $membersRef, 'update', 10, 1 );
+                    
+                    $this->loader->add_filter( 'members_enable_attachment_content_permissions', $plugin_public, 'members_enable_attachment_content_permissions');
+                }
 	}
 
 	/**

@@ -132,14 +132,21 @@ class Wp_Media_Roles_Public {
         }
     }
     
+    public function members_enable_attachment_content_permissions($enable = false)
+    {
+        return true;
+    }
+    
     // TODO: When "Members" plugin not activated and fail-secure is true
     // then add note to public display.
     
     // TODO: move all code below to new class.
     
     public function doMediaRolePermissions(wpapi\v1\WordpressPluginApi $wordpressApi, PhpApi $phpApi, MembersApi $membersApi)
-    {
-        $GET_FILE = $this->getValidPathFromUrl($phpApi);
+    {      
+        $requested_url = $phpApi->filter_input(INPUT_SERVER, 'REQUEST_URI', FILTER_SANITIZE_URL);
+
+        $GET_FILE = $this->getValidPathFromUrl($requested_url, $phpApi);
 
         $post = $this->getMediaPostByPath($GET_FILE);
 
@@ -247,10 +254,8 @@ class Wp_Media_Roles_Public {
         var_dump($error);
     }
     
-    public function getValidPathFromUrl(PhpApi $phpApi)
+    public function getValidPathFromUrl(string $url,PhpApi $phpApi)
     {
-        $url = $phpApi->filter_input(INPUT_SERVER, 'REQUEST_URI', FILTER_SANITIZE_URL);
-        
         if ($url === null || strlen($url) === 0) $url = $_SERVER['REQUEST_URI'];
         
         if (strlen($url) < 5) throw new Exception();
@@ -392,22 +397,5 @@ class Wp_Media_Roles_Public {
     {
         global $wpdb;
         return $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE guid LIKE '%s'", "%$guid" ) );
-    }
-    
-    public function getHtaccessRules()
-    {
-        $ret = "";
-        
-        $ret .= "<IfModule mod_rewrite.c>";
-        $ret .=     "RewriteEngine On";
-        $ret .=     "### start-wp-media-roles ###";
-        $ret .=     "RewriteCond %{HTTP_HOST} ^wasb.org [OR]";
-        $ret .=     "RewriteCond %{HTTP_HOST} ^www.wasb.org$";
-        $ret .=     "RewriteCond %{REQUEST_FILENAME} -f";
-        $ret .=     "RewriteRule ^(.+\.(pdf|doc|docx|xls|xlsx|ppt|pptx))$ /index.php [L]";
-        $ret .=     "### end-wp-media-roles ###";
-        $ret .= "</IfModule>";
-        
-        return $ret;
     }
 }
