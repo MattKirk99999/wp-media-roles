@@ -133,6 +133,8 @@ class Wp_Media_Roles_Admin {
 
     public function display_management_page()
     {
+        $htaccessLines = (new HtaccessService())->getHtaccessRulesLines();
+        
         include_once( 'partials/wp-media-roles-admin-display.php' );
     }
 
@@ -140,65 +142,24 @@ class Wp_Media_Roles_Admin {
     {
         return $this->membersApi;
     }
-
+    
     public function getHtaccessPath(): string
     {
-        $wordpress_path = get_home_path();
-
-        $filename = ".htaccess";
-
-        return $wordpress_path . "wp-content/uploads/" . $filename;
+        return (new HtaccessService())->getHtaccessPath();
     }
 
     public function htaccessExists(): bool
     {
-        $path = $this->getHtaccessPath();
-
-        return file_exists($path);
+        return (new HtaccessService())->htaccessExists();
     }
 
     public function htaccessIsValid(): bool
     {
-        if (!$this->htaccessExists()) return false;
-
-        $contents = trim( file_get_contents($this->getHtaccessPath()) );
-
-        $expected = trim( $this->getHtaccessRules() );
-
-        return $contents == $expected;
+        return (new HtaccessService())->htaccessIsValid();
     }
 
     public function getHtaccessRules(): string
     {
-        $ret = "";
-
-        $ret .= "<IfModule mod_rewrite.c>\n";
-        $ret .=     "RewriteEngine On\n";
-        $ret .=     "### start-wp-media-roles ###\n";
-        $ret .=     "RewriteCond %{HTTP_HOST} ^wasb.org [OR]\n";
-        $ret .=     "RewriteCond %{HTTP_HOST} ^www.wasb.org$\n";
-        $ret .=     "RewriteCond %{REQUEST_FILENAME} -f\n";
-        $ret .=     "RewriteRule ^(.+\.(pdf|doc|docx|xls|xlsx|ppt|pptx))$ /index.php [L]\n";
-        $ret .=     "### end-wp-media-roles ###\n";
-        $ret .= "</IfModule>";
-
-        return $ret;
-    }
-    
-    public function testHtaccess(): bool
-    {
-//        copy('foo/test.php', 'bar/test.php');
-//        
-//        $url = plugins_url();
-//        
-//        var_dump($url);
-//        
-//        $test_url = get_site_url() . "/wp-content/uploads/wp-media-roles/test/fake/path/to/fake/file.pdf";
-        
-//        $contents = file_get_contents($test_url);
-//        
-//        var_dump($contents);
-        
-        return false;
+        return (new HtaccessService())->getHtaccessRules();
     }
 }

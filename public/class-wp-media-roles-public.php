@@ -120,8 +120,9 @@ class Wp_Media_Roles_Public {
 
     }
     
-    public function init()
+    public function parse_request()
     {
+//        exit;
         try 
         {
             $this->doMediaRolePermissions($this->wordpressApi, $this->phpApi, $this->membersApi);
@@ -158,7 +159,12 @@ class Wp_Media_Roles_Public {
         }
         else
         {
-            $wordpressApi->wp_redirect("/?attachment_id=".$post->ID);
+            /* Chrome will cache the redirect for logged-in users if we aren't careful */
+//            $wordpressApi->wp_redirect("/?attachment_id=".$post->ID);
+            header('Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0');
+            header('Expires: Sat, 26 Jul 1997 05:00:00 GMT');
+            header('Location:'."/?attachment_id=".$post->ID, true, 303);
+            exit;
         }
         $phpApi->___exit();
     }   
