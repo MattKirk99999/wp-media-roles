@@ -77,28 +77,6 @@ $membersApi = getMembersApi();
                         </td>
                     </tr>
                 </table>
-                
-                <br/>
-                
-                <form id="recreate-htaccess" action="/wp-admin/admin-ajax.php?action=recreate_htaccess" method="get">
-                    <input type="submit" value="Recreate .htaccess">
-                </form>
-                <div id="recreate-results">
-                    
-                </div>
-                
-                <br/>
-                <br/>
-                
-                <div style="border: 1px solid #444444; padding: 5px; background-color: rgba(255,255,255,0.25);">
-                    <?php
-                    foreach ($htaccessLines as $line)
-                    {
-                        echo $line;
-                        echo "<br/>";
-                    }
-                    ?>
-                </div>
             </div>
         </div>
     </div>

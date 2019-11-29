@@ -120,9 +120,8 @@ class Wp_Media_Roles_Public {
 
     }
     
-    public function parse_request()
+    public function init()
     {
-//        exit;
         try 
         {
             $this->doMediaRolePermissions($this->wordpressApi, $this->phpApi, $this->membersApi);

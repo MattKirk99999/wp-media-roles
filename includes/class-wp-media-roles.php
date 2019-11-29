@@ -82,7 +82,7 @@ class Wp_Media_Roles {
 	public function __construct() {
 
 		$this->plugin_name = 'wp-media-roles';
-		$this->version = '1.1.0';
+		$this->version = '1.0.0';
                 
 		$this->load_dependencies();
 		$this->set_locale();
@@ -93,13 +93,7 @@ class Wp_Media_Roles {
                 
                 $this->membersApi = new MembersApi();
                 
-                if (is_admin() || is_customize_preview())
-                {
-                    $this->define_admin_hooks();
-                    
-                    $this->define_ajax_hooks();
-                }
-                
+                $this->define_admin_hooks();
 		$this->define_public_hooks();
 
 	}
@@ -134,16 +128,6 @@ class Wp_Media_Roles {
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-wp-media-roles-i18n.php';
 
-                /**
-		 * Core dependencies.
-		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'core/service/class-htaccess-service.php';
-                
-                /**
-		 * The class responsible for defining all ajax.
-		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'ajax/class-wp-media-roles-ajax.php';
-                
 		/**
 		 * The class responsible for defining all actions that occur in the admin area.
 		 */
@@ -185,23 +169,6 @@ class Wp_Media_Roles {
 
 	}
 
-        /**
-	 * Register all of the hooks related to the admin area functionality
-	 * of the plugin.
-	 *
-	 * @since    1.0.0
-	 * @access   private
-	 */
-	private function define_ajax_hooks() {
-
-		$plugin_ajax = new Wp_Media_Roles_Ajax( $this->get_plugin_name(), $this->get_version() );
-
-		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_ajax, 'enqueue_styles' );
-		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_ajax, 'enqueue_scripts' );
-
-                $this->loader->add_action( 'wp_ajax_recreate_htaccess', $plugin_ajax, 'wp_ajax_recreate_htaccess' );
-	}
-        
 	/**
 	 * Register all of the hooks related to the admin area functionality
 	 * of the plugin.
@@ -247,7 +214,7 @@ class Wp_Media_Roles {
 
                 $membersRef =  $this->membersApi->get_membersuite_admin_instance();
                 
-                $this->loader->add_action( 'parse_request', $plugin_public, 'parse_request', 99999, 0);
+                $this->loader->add_action( 'init', $plugin_public, 'init', 10, 0);
                 
                 if ($membersRef !== null)
                 {

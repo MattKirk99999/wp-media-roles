@@ -133,8 +133,6 @@ class Wp_Media_Roles_Admin {
 
     public function display_management_page()
     {
-        $htaccessLines = (new HtaccessService())->getHtaccessRulesLines();
-        
         include_once( 'partials/wp-media-roles-admin-display.php' );
     }
 
@@ -142,24 +140,65 @@ class Wp_Media_Roles_Admin {
     {
         return $this->membersApi;
     }
-    
+
     public function getHtaccessPath(): string
     {
-        return (new HtaccessService())->getHtaccessPath();
+        $wordpress_path = get_home_path();
+
+        $filename = ".htaccess";
+
+        return $wordpress_path . "wp-content/uploads/" . $filename;
     }
 
     public function htaccessExists(): bool
     {
-        return (new HtaccessService())->htaccessExists();
+        $path = $this->getHtaccessPath();
+
+        return file_exists($path);
     }
 
     public function htaccessIsValid(): bool
     {
-        return (new HtaccessService())->htaccessIsValid();
+        if (!$this->htaccessExists()) return false;
+
+        $contents = trim( file_get_contents($this->getHtaccessPath()) );
+
+        $expected = trim( $this->getHtaccessRules() );
+
+        return $contents == $expected;
     }
 
     public function getHtaccessRules(): string
     {
-        return (new HtaccessService())->getHtaccessRules();
+        $ret = "";
+
+        $ret .= "<IfModule mod_rewrite.c>\n";
+        $ret .=     "RewriteEngine On\n";
+        $ret .=     "### start-wp-media-roles ###\n";
+        $ret .=     "RewriteCond %{HTTP_HOST} ^wasb.org [OR]\n";
+        $ret .=     "RewriteCond %{HTTP_HOST} ^www.wasb.org$\n";
+        $ret .=     "RewriteCond %{REQUEST_FILENAME} -f\n";
+        $ret .=     "RewriteRule ^(.+\.(pdf|doc|docx|xls|xlsx|ppt|pptx))$ /index.php [L]\n";
+        $ret .=     "### end-wp-media-roles ###\n";
+        $ret .= "</IfModule>";
+
+        return $ret;
+    }
+    
+    public function testHtaccess(): bool
+    {
+//        copy('foo/test.php', 'bar/test.php');
+//        
+//        $url = plugins_url();
+//        
+//        var_dump($url);
+//        
+//        $test_url = get_site_url() . "/wp-content/uploads/wp-media-roles/test/fake/path/to/fake/file.pdf";
+        
+//        $contents = file_get_contents($test_url);
+//        
+//        var_dump($contents);
+        
+        return false;
     }
 }
