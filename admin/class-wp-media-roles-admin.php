@@ -53,6 +53,8 @@ class Wp_Media_Roles_Admin {
 
     private $membersApi;
 
+    private $htaccessService;
+    
     /**
      * Initialize the class and set its properties.
      *
@@ -72,6 +74,8 @@ class Wp_Media_Roles_Admin {
         $this->wordpressApi = $wordpressApi;
         $this->phpApi = $phpApi;
         $this->membersApi = $membersApi;
+        
+        $this->htaccessService = new HtaccessService( $plugin_name, $version );
     }
 
     /**
@@ -133,7 +137,11 @@ class Wp_Media_Roles_Admin {
 
     public function display_management_page()
     {
-        $htaccessLines = (new HtaccessService())->getHtaccessRulesLines();
+        $htaccessCurrent  = $this->htaccessService->getCurrentHtaccessRules();
+        
+        $htaccessExpected = $this->htaccessService->getHtaccessRules();
+        
+        $htaccessSaved    = $this->htaccessService->viewSaved();
         
         include_once( 'partials/wp-media-roles-admin-display.php' );
     }
@@ -145,21 +153,21 @@ class Wp_Media_Roles_Admin {
     
     public function getHtaccessPath(): string
     {
-        return (new HtaccessService())->getHtaccessPath();
+        return $this->htaccessService->getHtaccessPath();
     }
 
     public function htaccessExists(): bool
     {
-        return (new HtaccessService())->htaccessExists();
+        return $this->htaccessService->htaccessExists();
     }
 
     public function htaccessIsValid(): bool
     {
-        return (new HtaccessService())->htaccessIsValid();
+        return $this->htaccessService->htaccessIsValid();
     }
 
     public function getHtaccessRules(): string
     {
-        return (new HtaccessService())->getHtaccessRules();
+        return $this->htaccessService->getHtaccessRules();
     }
 }

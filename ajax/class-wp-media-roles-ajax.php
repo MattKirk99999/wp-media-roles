@@ -31,6 +31,8 @@ class Wp_Media_Roles_Ajax
      */
     private $version;
 
+    private $htaccessService;
+    
     /**
      * Initialize the class and set its properties.
      *
@@ -42,7 +44,8 @@ class Wp_Media_Roles_Ajax
 
             $this->plugin_name = $plugin_name;
             $this->version = $version;
-
+            
+            $this->htaccessService = new HtaccessService( $plugin_name, $version );
     }
 
     /**
@@ -133,24 +136,29 @@ class Wp_Media_Roles_Ajax
         add_filter( 'wp_die_ajax_handler', array($this, 'wp_die_ajax_handler'), 100 );
 
         $status = ['status'=>'in-progress'];
-        
-        $htaccess = new HtaccessService();
-        
-        if ($htaccess->htaccessIsValid())
+
+        if ($this->htaccessService->htaccessIsValid())
         {
             $status['status'] = 'No change: .htaccess is already valid.';
             wp_send_json( $status, 200 );
             return;
         }
+
+        $this->htaccessService->save();
+        
+        $this->htaccessService->recreate();
+        
+        if ($this->htaccessService->htaccessIsValid())
+        {
+            $status['status'] = 'Success.';
+        }
         else
         {
-            $htaccess->recreate();
+            $this->htaccessService->restore();
+            
+            $status['status'] = 'Failed: unable to modify .htaccess.';
         }
-        
-        if (!$htaccess->htaccessIsValid()) $status['status'] = 'Failed: unable to modify .htaccess.';
 
-        $status['status'] = 'Success.';
-        
         wp_send_json( $status, 200 );
     }
 

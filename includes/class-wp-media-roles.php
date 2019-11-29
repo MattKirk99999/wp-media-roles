@@ -102,6 +102,12 @@ class Wp_Media_Roles {
                 
 		$this->define_public_hooks();
 
+                if (!is_admin())
+                {
+                    $this->define_template_hooks();
+                    
+                    $this->add_shortcodes();
+                }
 	}
 
 	/**
@@ -155,8 +161,9 @@ class Wp_Media_Roles {
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-wp-media-roles-public.php';
                 
-		
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public-templates/class-media-template.php';
                 
+                require_once plugin_dir_path( dirname( __FILE__ ) ) . 'shortcodes/class-wp-media-roles-shortcodes.php';
                 
                 require_once plugin_dir_path( dirname( __FILE__ ) ) . 'vendor/wordpress-plugin-api/WordpressPluginApi.php';
                 
@@ -257,6 +264,36 @@ class Wp_Media_Roles {
                 }
 	}
 
+        /**
+	 * Register all of the hooks related to the public-facing functionality
+	 * of the plugin.
+	 *
+	 * @since    1.0.0
+	 * @access   private
+	 */
+	private function define_template_hooks() 
+        {
+            $class = new Media_Template( $this->get_plugin_name(), $this->get_version() );
+            
+            $this->loader->add_filter( 'the_content', $class, 'the_content', 10, 1 );
+
+            $this->loader->add_filter( 'template_include', $class, 'template_include', 10, 1 );
+
+            $this->loader->add_filter( 'get_post_metadata', $class, 'get_post_metadata', 10, 4 );
+            
+            $this->loader->add_filter( 'members_post_error_message', $class, 'members_post_error_message', 10, 1 );
+	}
+        
+        private function add_shortcodes()
+	{
+            $shortcodes = new Wp_Media_Roles_Shortcodes( $this->get_plugin_name(), $this->get_version());
+
+            $this->loader->add_action( 'wp_enqueue_scripts', $shortcodes, 'enqueue_styles' );
+            $this->loader->add_action( 'wp_enqueue_scripts', $shortcodes, 'enqueue_scripts' );
+
+            $this->loader->add_shortcode('post_info', $shortcodes, 'post_info');
+	}
+        
 	/**
 	 * Run the loader to execute all of the hooks with WordPress.
 	 *

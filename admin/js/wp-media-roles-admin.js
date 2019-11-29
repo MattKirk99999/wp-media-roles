@@ -9,8 +9,13 @@
                 url : $(this).attr("action"),
                 type: $(this).attr("method"),
                 data : $(this).serialize()
-            }).done(function(response){
+            })
+            .done(function(response){
                 $("#recreate-results").html(response.status);
+            })
+            .fail(function(response){
+                console.log(response);
+                $("#recreate-results").html(response.responseJSON.status);
             });
         });
     });
