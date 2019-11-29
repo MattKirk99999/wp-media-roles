@@ -25,6 +25,9 @@
  * Domain Path:       /languages
  */
 
+//function wp_media_roles_shutdown() { var_dump(error_get_last()); }
+//register_shutdown_function('wp_media_roles_shutdown');
+
 // If this file is called directly, abort.
 if ( ! defined( 'WPINC' ) ) {
 	die;

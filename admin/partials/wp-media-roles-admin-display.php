@@ -53,7 +53,7 @@ $membersApi = getMembersApi();
                             Members Admin Instance Loaded:
                         </td>
                         <td>
-                            <?php echo($membersApi->get_membersuite_admin_instance() > 0 ? "True":"<b>False</b>"); ?>
+                            <?php echo($membersApi->get_membersuite_admin_instance() === null ? "<b>False</b>":"True"); ?>
                         </td>
                     </tr>
                     <tr>
@@ -77,6 +77,37 @@ $membersApi = getMembersApi();
                         </td>
                     </tr>
                 </table>
+                
+                <br/>
+                <br/>
+                
+                <h4>Current .htaccess: </h4>
+                <pre style="border: 1px solid #444444; padding: 5px; background-color: rgba(255,255,255,0.25);"><code><?php 
+                    echo htmlentities($htaccessCurrent);  
+                ?></code></pre>
+                
+                <br/>
+                <br/>
+                
+                <form id="recreate-htaccess" action="/wp-admin/admin-ajax.php?action=recreate_htaccess" method="get">
+                    <input type="submit" value="Recreate .htaccess as:">
+                </form>
+                <div id="recreate-results">
+                    
+                </div>
+                <pre style="border: 1px solid #444444; padding: 5px; background-color: rgba(255,255,255,0.25);"><code><?php 
+                    echo htmlentities($htaccessExpected);  
+                ?></code></pre>
+                
+                <form id="restore-htaccess" action="/wp-admin/admin-ajax.php?action=restore_htaccess" method="get">
+                    <input type="submit" value="Restore .htaccess as:">
+                </form>
+                <div id="restore-results">
+                    
+                </div>
+                <pre style="border: 1px solid #444444; padding: 5px; background-color: rgba(255,255,255,0.25);"><code><?php 
+                    echo htmlentities($htaccessSaved);  
+                ?></code></pre>
             </div>
         </div>
     </div>
